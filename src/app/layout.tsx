@@ -31,10 +31,10 @@ export const metadata: Metadata = {
   // cards.
   //
   // This must be a URL the public can reach. The team-scoped aliases
-  // (portfolio-surya-9b93.vercel.app) sit behind Vercel Authentication and
+  // (portfolio-*-surya-9b93.vercel.app) sit behind Vercel Authentication and
   // serve a login page to social crawlers. Point this at a custom domain once
   // there is one.
-  metadataBase: new URL("https://portfolio-three-nu-53jzivpt2h.vercel.app"),
+  metadataBase: new URL("https://suryasrekanth.vercel.app"),
   title: `${profile.name} - ${profile.role}`,
   description: profile.headline,
   openGraph: {
