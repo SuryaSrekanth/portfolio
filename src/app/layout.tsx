@@ -28,8 +28,13 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   // Absolute base for og:image and friends. Without it Next falls back to the
   // per-deployment URL, which changes on every deploy and breaks old share
-  // cards. Point this at a custom domain once there is one.
-  metadataBase: new URL("https://portfolio-surya-9b93.vercel.app"),
+  // cards.
+  //
+  // This must be a URL the public can reach. The team-scoped aliases
+  // (portfolio-surya-9b93.vercel.app) sit behind Vercel Authentication and
+  // serve a login page to social crawlers. Point this at a custom domain once
+  // there is one.
+  metadataBase: new URL("https://portfolio-three-nu-53jzivpt2h.vercel.app"),
   title: `${profile.name} - ${profile.role}`,
   description: profile.headline,
   openGraph: {
