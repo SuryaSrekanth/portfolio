@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Foundations: Node, npm, React, Next.js, TypeScript, Tailwind</title>
+<meta name="description" content="A beginner's guide to Node, npm, React, Next.js, TypeScript and Tailwind, explained with diagrams.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%B1%3C/text%3E%3C/svg%3E">
+<style>
+  /* Minimal reset. The hosted artifact gets one for free; a standalone file
+     has to bring its own. */
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+  img, svg { max-width: 100%; }
+
+  :root {
+    --paper:      #fcfbfe;
+    --surface:    #ffffff;
+    --sunk:       #f5f3fb;
+    --ink:        #17151f;
+    --muted:      #6a6680;
+    --line:       #e6e3f0;
+    --accent:     #4f46e5;
+    --accent-ink: #3730a3;
+    --accent-soft:#eef0fe;
+    --warn:       #a4530b;
+    --warn-soft:  #fdf4e7;
+    --warn-line:  #f0dcbd;
+    --good:       #0f7355;
+    --good-soft:  #e7f5ef;
+    --bad:        #b02a3c;
+    --bad-soft:   #fdeef0;
+
+    --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#0f0e15; --surface:#17151f; --sunk:#13121a;
+      --ink:#eceaf4; --muted:#9995ad; --line:#272232;
+      --accent:#8b93f8; --accent-ink:#aab0ff; --accent-soft:#1b1a30;
+      --warn:#e0a253; --warn-soft:#241d12; --warn-line:#3d3120;
+      --good:#4ec9a0; --good-soft:#12231e;
+      --bad:#f2879a; --bad-soft:#2a1419;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0f0e15; --surface:#17151f; --sunk:#13121a;
+    --ink:#eceaf4; --muted:#9995ad; --line:#272232;
+    --accent:#8b93f8; --accent-ink:#aab0ff; --accent-soft:#1b1a30;
+    --warn:#e0a253; --warn-soft:#241d12; --warn-line:#3d3120;
+    --good:#4ec9a0; --good-soft:#12231e;
+    --bad:#f2879a; --bad-soft:#2a1419;
+  }
+  :root[data-theme="light"] {
+    --paper:#fcfbfe; --surface:#ffffff; --sunk:#f5f3fb;
+    --ink:#17151f; --muted:#6a6680; --line:#e6e3f0;
+    --accent:#4f46e5; --accent-ink:#3730a3; --accent-soft:#eef0fe;
+    --warn:#a4530b; --warn-soft:#fdf4e7; --warn-line:#f0dcbd;
+    --good:#0f7355; --good-soft:#e7f5ef;
+    --bad:#b02a3c; --bad-soft:#fdeef0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-body); font-size: 16.5px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    display: grid; grid-template-columns: 1fr; gap: 0;
+    max-width: 1180px; margin-inline: auto;
+    padding: 0 clamp(1.1rem, 4vw, 2.5rem) 6rem;
+  }
+  @media (min-width: 1020px) {
+    .page { grid-template-columns: 210px minmax(0, 1fr); gap: 3.5rem; }
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    grid-column: 1 / -1;
+    padding: clamp(3rem, 8vw, 5rem) 0 clamp(2rem, 5vw, 3rem);
+    border-bottom: 1px solid var(--line); margin-bottom: 3rem;
+  }
+  .kicker {
+    font-family: var(--font-mono); font-size: .7rem; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 1.1rem;
+  }
+  .masthead h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2.1rem, 5.5vw, 3.4rem); line-height: 1.1;
+    letter-spacing: -.015em; text-wrap: balance; margin: 0 0 1.2rem; max-width: 20ch;
+  }
+  .standfirst { max-width: var(--measure); font-size: 1.06rem; color: var(--muted); margin: 0; }
+
+  /* ---------- side nav ---------- */
+  .toc { display: none; }
+  @media (min-width: 1020px) {
+    .toc {
+      display: block; position: sticky; top: 2rem; align-self: start;
+      max-height: calc(100vh - 4rem); overflow-y: auto; font-size: .83rem;
+    }
+  }
+  .toc p {
+    font-family: var(--font-mono); font-size: .65rem; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 .85rem;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  .toc a {
+    color: var(--muted); text-decoration: none; display: block; line-height: 1.4;
+    border-left: 2px solid var(--line); padding-left: .7rem;
+    transition: color .15s, border-color .15s;
+  }
+  .toc a:hover { color: var(--ink); border-left-color: var(--accent); }
+
+  /* ---------- article ---------- */
+  article { min-width: 0; }
+  section { margin-bottom: 4.5rem; scroll-margin-top: 1.5rem; }
+
+  h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(1.55rem, 3.4vw, 2.1rem); line-height: 1.2;
+    letter-spacing: -.01em; text-wrap: balance; margin: 0 0 .4rem;
+    display: flex; align-items: baseline; gap: .75rem;
+  }
+  h2 .num {
+    font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em;
+    color: var(--accent); flex: none; transform: translateY(-.35em);
+  }
+  h3 { font-family: var(--font-body); font-size: 1rem; font-weight: 650; margin: 2.2rem 0 .5rem; }
+
+  .lede { color: var(--muted); max-width: var(--measure); margin: 0 0 1.6rem; padding-left: 1.47rem; }
+  p, ul { max-width: var(--measure); }
+  p { margin: 0 0 1.05rem; }
+  ul { padding-left: 1.15rem; margin: 0 0 1.05rem; }
+  li { margin-bottom: .4rem; }
+  strong { font-weight: 650; }
+
+  code {
+    font-family: var(--font-mono); font-size: .855em; background: var(--sunk);
+    border: 1px solid var(--line); border-radius: 4px; padding: .09em .35em;
+  }
+  pre {
+    font-family: var(--font-mono); font-size: .8rem; line-height: 1.7;
+    background: var(--sunk); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem 1.15rem; overflow-x: auto; margin: 0 0 1.3rem;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+  .comment { color: var(--muted); }
+  .hl { color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- callouts ---------- */
+  .note, .warn {
+    border: 1px solid var(--line); border-radius: 0 8px 8px 0;
+    padding: 1rem 1.15rem; margin: 0 0 1.4rem; max-width: var(--measure);
+  }
+  .note { border-left: 3px solid var(--accent); background: var(--accent-soft); }
+  .warn { border: 1px solid var(--warn-line); border-left: 3px solid var(--warn); background: var(--warn-soft); }
+  .note > :last-child, .warn > :last-child { margin-bottom: 0; }
+  .note .tag, .warn .tag {
+    display: block; font-family: var(--font-mono); font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; margin-bottom: .45rem;
+  }
+  .note .tag { color: var(--accent-ink); }
+  .warn .tag { color: var(--warn); }
+
+  .say {
+    border-top: 1px solid var(--line); padding-top: .85rem; margin-top: 1.5rem;
+    max-width: var(--measure); display: flex; gap: .85rem; align-items: baseline;
+  }
+  .say b {
+    font-family: var(--font-mono); font-size: .62rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted); font-weight: 500; flex: none; width: 5.2rem;
+  }
+  .say span { font-style: italic; font-family: var(--font-display); font-size: 1.02rem; }
+
+  /* ================= DIAGRAM PRIMITIVES ================= */
+
+  .dg {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 1.4rem; margin: 0 0 1.5rem; overflow-x: auto;
+  }
+  .dg-cap {
+    font-family: var(--font-mono); font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    margin: 1.1rem 0 0; padding-top: .8rem; border-top: 1px solid var(--line);
+  }
+  .lbl {
+    font-family: var(--font-mono); font-size: .62rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .box {
+    border: 1px solid var(--line); background: var(--sunk);
+    border-radius: 8px; padding: .8rem .9rem;
+  }
+  .box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .arrow { color: var(--accent); flex: none; }
+
+  /* --- mini browser mockups (three languages) --- */
+  .mocks { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 620px) { .mocks { grid-template-columns: repeat(3, 1fr); } }
+  .mock { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .mock .bar { display: flex; gap: 4px; padding: 7px 9px; background: var(--sunk); border-bottom: 1px solid var(--line); }
+  .mock .bar i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+  .mock .body { padding: 12px; display: flex; flex-direction: column; gap: 7px; min-height: 118px; }
+  .mock .h { height: 11px; border-radius: 3px; background: var(--muted); opacity: .5; width: 72%; }
+  .mock .t { height: 6px; border-radius: 3px; background: var(--muted); opacity: .28; }
+  .mock .t.s { width: 85%; }
+  .mock .t.m { width: 60%; }
+  .mock .btn { height: 18px; width: 62px; border-radius: 9px; background: var(--line); margin-top: auto; }
+  /* styled variant */
+  .mock.styled .h { background: var(--ink); opacity: 1; height: 13px; }
+  .mock.styled .btn { background: var(--accent); }
+  .mock.styled .body { padding: 14px; gap: 9px; }
+  /* interactive variant */
+  .mock.live .h { background: var(--ink); opacity: 1; height: 13px; }
+  .mock.live .btn { background: var(--accent); position: relative; }
+  .mock.live .btn::after {
+    content: ""; position: absolute; right: -13px; bottom: -11px;
+    width: 0; height: 0; border-left: 8px solid var(--ink);
+    border-bottom: 5px solid transparent; border-right: 4px solid transparent;
+    transform: rotate(-20deg);
+  }
+  .mock figcaption {
+    font-family: var(--font-mono); font-size: .64rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 8px 12px 10px; border-top: 1px solid var(--line);
+  }
+  .mock figcaption b { display: block; color: var(--accent-ink); letter-spacing: .13em; margin-bottom: 2px; }
+
+  /* --- the boundary diagram --- */
+  .boundary { display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: stretch; }
+  @media (min-width: 760px) { .boundary { grid-template-columns: 1fr auto 1fr; } }
+  .side { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem 1.15rem; background: var(--sunk); }
+  .side.browser { background: var(--accent-soft); border-color: var(--accent); }
+  .side h4 { margin: 0 0 .1rem; font-size: .98rem; font-family: var(--font-display); font-weight: 400; }
+  .side .lbl { display: block; margin-bottom: .5rem; }
+  .side p { font-size: .82rem; color: var(--muted); margin: .7rem 0 0; max-width: none; }
+  .stack-chips { list-style: none; margin: .7rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+  .stack-chips li {
+    font-family: var(--font-mono); font-size: .73rem; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 5px; padding: .3rem .55rem; margin: 0;
+  }
+  .crossing {
+    display: flex; flex-direction: row; align-items: center; justify-content: center;
+    gap: .5rem; padding: .5rem 0;
+  }
+  @media (min-width: 760px) { .crossing { flex-direction: column; padding: 0 .2rem; } }
+  .crossing .lbl { text-align: center; max-width: 8rem; line-height: 1.5; }
+  .crossing svg { flex: none; }
+  @media (max-width: 759px) { .crossing svg { transform: rotate(90deg); } }
+
+  /* --- dependency tree --- */
+  .tree { font-family: var(--font-mono); font-size: .8rem; line-height: 1.85; margin: 0; }
+  .tree .dim { color: var(--muted); }
+  .tree .cnt { color: var(--accent-ink); }
+
+  /* --- annotated code --- */
+  .anno { display: grid; grid-template-columns: 1fr; gap: .55rem; }
+  .anno-row { display: grid; grid-template-columns: 1fr; gap: .3rem; }
+  @media (min-width: 700px) { .anno-row { grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap: 1rem; align-items: center; } }
+  .anno pre { margin: 0; }
+  .anno .why { font-size: .84rem; color: var(--muted); border-left: 2px solid var(--accent); padding-left: .8rem; }
+  .anno .why b { color: var(--ink); font-weight: 650; display: block; font-size: .8rem; }
+
+  /* --- before / after --- */
+  .ba { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 700px) { .ba { grid-template-columns: 1fr 1fr; } }
+  .ba > div { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem 1.15rem; background: var(--sunk); }
+  .ba .lbl { display: block; margin-bottom: .7rem; }
+  .ba .bad-l { color: var(--bad); }
+  .ba .good-l { color: var(--good); }
+  .ba pre { background: var(--surface); font-size: .74rem; margin: 0; }
+  .repeat { display: flex; flex-direction: column; gap: .3rem; margin: 0 0 .7rem; }
+  .repeat span {
+    font-family: var(--font-mono); font-size: .68rem; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; padding: .25rem .5rem; color: var(--muted);
+  }
+  .verdict { font-size: .82rem; margin: .8rem 0 0; }
+  .verdict.b { color: var(--bad); }
+  .verdict.g { color: var(--good); }
+
+  /* --- file to url mapping --- */
+  .maps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+  .maps li { display: grid; grid-template-columns: 1fr auto 1fr; gap: .7rem; align-items: center; }
+  .maps code { white-space: nowrap; font-size: .76rem; display: block; text-align: center; padding: .4rem .5rem; }
+  .maps .out { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+
+  /* --- typescript check --- */
+  .checks { display: grid; grid-template-columns: 1fr; gap: .7rem; }
+  @media (min-width: 620px) { .checks { grid-template-columns: 1fr 1fr; } }
+  .check { border-radius: 8px; padding: .85rem .95rem; border: 1px solid var(--line); }
+  .check.ok { background: var(--good-soft); border-color: var(--good); }
+  .check.no { background: var(--bad-soft); border-color: var(--bad); }
+  .check .mark { font-family: var(--font-mono); font-size: .7rem; font-weight: 700; letter-spacing: .1em; }
+  .check.ok .mark { color: var(--good); }
+  .check.no .mark { color: var(--bad); }
+  .check pre { background: transparent; border: 0; padding: .5rem 0 0; margin: 0; font-size: .75rem; }
+  .check .msg { font-size: .76rem; color: var(--bad); font-family: var(--font-mono); margin-top: .4rem; line-height: 1.5; }
+
+  /* --- pipeline --- */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+  .pipe li { flex: 1 1 150px; border: 1px solid var(--line); background: var(--sunk); border-radius: 8px; padding: .85rem .9rem; margin: 0; }
+  .pipe li.out { background: var(--accent-soft); border-color: var(--accent); }
+  .pipe .step { font-family: var(--font-mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .35rem; }
+  .pipe .what { font-weight: 650; font-size: .9rem; display: block; margin-bottom: .3rem; }
+  .pipe .detail { color: var(--muted); font-size: .79rem; line-height: 1.5; display: block; }
+
+  /* --- the stack --- */
+  .layers { display: flex; flex-direction: column; gap: .4rem; }
+  .layer {
+    display: grid; grid-template-columns: auto 1fr; gap: .9rem; align-items: center;
+    border: 1px solid var(--line); border-radius: 8px; padding: .7rem .95rem; background: var(--sunk);
+    margin-inline: auto; width: 100%;
+  }
+  .layer .who { font-family: var(--font-mono); font-size: .8rem; font-weight: 600; white-space: nowrap; }
+  .layer .job { font-size: .82rem; color: var(--muted); }
+  .layer.top { background: var(--accent-soft); border-color: var(--accent); }
+  .layer.top .who { color: var(--accent-ink); }
+  .layer.base { background: var(--surface); }
+  .rung { display: flex; align-items: center; gap: .6rem; justify-content: center; color: var(--muted); }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; margin: 0 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: .9rem; }
+  th, td { text-align: left; padding: .62rem .9rem .62rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: var(--font-mono); font-size: .64rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted); font-weight: 500; border-bottom-color: var(--ink);
+  }
+
+  .end {
+    grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 1.5rem;
+    color: var(--muted); font-size: .85rem;
+  }
+  a { color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* Standalone theme toggle. The hosted version gets one from the platform;
+     this file needs its own so the button is not a dead control offline. */
+  .theme-toggle {
+    position: fixed; top: 1rem; right: 1rem; z-index: 50;
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-family: var(--font-mono); font-size: .66rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; padding: .45rem .8rem; cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
+  @media print { .theme-toggle { display: none; } }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="themeToggle" type="button">
+  <span id="themeLabel">Dark</span>
+</button>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="kicker">Foundations · Written for Surya's portfolio project</p>
+    <h1>What all these tools actually are</h1>
+    <p class="standfirst">
+      Node, npm, React, Next.js, TypeScript, Tailwind. Six names thrown around
+      as if everyone already knows them. Here is what each one is, what problem
+      it solves, and where it shows up in the portfolio we built. No prior
+      knowledge assumed.
+    </p>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ol>
+      <li><a href="#s1">1. The three languages</a></li>
+      <li><a href="#s2">2. Where code runs</a></li>
+      <li><a href="#s3">3. Node.js</a></li>
+      <li><a href="#s4">4. npm</a></li>
+      <li><a href="#s5">5. package.json</a></li>
+      <li><a href="#s6">6. React</a></li>
+      <li><a href="#s7">7. Next.js</a></li>
+      <li><a href="#s8">8. TypeScript</a></li>
+      <li><a href="#s9">9. Tailwind CSS</a></li>
+      <li><a href="#s10">10. Dev server vs build</a></li>
+      <li><a href="#s11">11. All together</a></li>
+      <li><a href="#s12">12. Command reference</a></li>
+    </ol>
+  </nav>
+
+  <article>
+
+    <!-- =============== 01 =============== -->
+    <section id="s1">
+      <h2><span class="num">01</span> The three languages of the web</h2>
+      <p class="lede">Everything else in this document exists to help you write these three things more comfortably.</p>
+
+      <div class="dg">
+        <div class="mocks">
+          <figure class="mock" style="margin:0">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="body">
+              <div class="h"></div><div class="t s"></div><div class="t m"></div>
+              <div class="btn"></div>
+            </div>
+            <figcaption><b>HTML</b> Structure only. Content in order, no styling.</figcaption>
+          </figure>
+          <figure class="mock styled" style="margin:0">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="body">
+              <div class="h"></div><div class="t s"></div><div class="t m"></div>
+              <div class="btn"></div>
+            </div>
+            <figcaption><b>+ CSS</b> Colour, size and spacing applied.</figcaption>
+          </figure>
+          <figure class="mock live" style="margin:0">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="body">
+              <div class="h"></div><div class="t s"></div><div class="t m"></div>
+              <div class="btn"></div>
+            </div>
+            <figcaption><b>+ JavaScript</b> The button now does something.</figcaption>
+          </figure>
+        </div>
+        <p class="dg-cap">The same page, three times. Each language adds one layer.</p>
+      </div>
+
+      <p>
+        A browser understands these three and <strong>nothing else</strong>. That
+        is the single most important fact in this document. Every tool below
+        eventually produces HTML, CSS, and JavaScript, because that is the only
+        thing a browser can run.
+      </p>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>HTML is the structure, CSS is the look, JavaScript is the behaviour. Browsers speak only these three.</span>
+      </div>
+    </section>
+
+    <!-- =============== 02 =============== -->
+    <section id="s2">
+      <h2><span class="num">02</span> Where code runs</h2>
+      <p class="lede">The thing that confuses almost every beginner. Two different computers are involved, and only some things cross between them.</p>
+
+      <div class="dg">
+        <div class="boundary">
+          <div class="side">
+            <span class="lbl">Place one</span>
+            <h4>Your computer</h4>
+            <ul class="stack-chips">
+              <li>Node.js</li>
+              <li>npm</li>
+              <li>TypeScript</li>
+              <li>Tailwind</li>
+              <li>The build step</li>
+            </ul>
+            <p>Only while you are building. The visitor never sees any of this.</p>
+          </div>
+
+          <div class="crossing" aria-hidden="true">
+            <span class="lbl">only the<br>build output<br>crosses</span>
+            <svg width="46" height="20" viewBox="0 0 46 20" fill="none" class="arrow">
+              <path d="M0 10h38M31 4l7 6-7 6" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div class="side browser">
+            <span class="lbl">Place two</span>
+            <h4>The visitor's browser</h4>
+            <ul class="stack-chips">
+              <li>index.html</li>
+              <li>styles.css</li>
+              <li>app.js</li>
+            </ul>
+            <p>Three plain files. Nothing from the left column is here.</p>
+          </div>
+        </div>
+        <p class="dg-cap">Tools live on the left. Only their finished output travels right.</p>
+      </div>
+
+      <p>
+        Notice that <strong>TypeScript and Tailwind appear only on the left</strong>.
+        They are conveniences for you while writing. By the time a visitor loads
+        the page, they have been turned into ordinary JavaScript and ordinary
+        CSS. The browser never knows they existed.
+      </p>
+
+      <p>
+        Hold on to this diagram. It quietly answers a lot of later questions,
+        including why <code>devDependencies</code> is a separate list from
+        <code>dependencies</code>.
+      </p>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>Some tools help me write the code; only plain HTML, CSS and JavaScript ever reach the visitor.</span>
+      </div>
+    </section>
+
+    <!-- =============== 03 =============== -->
+    <section id="s3">
+      <h2><span class="num">03</span> Node.js</h2>
+      <p class="lede">JavaScript, but running on your computer instead of inside a browser.</p>
+
+      <p>
+        JavaScript was invented to run inside web browsers, and for about twenty
+        years that was the only place it could run. <strong>Node.js</strong> took
+        the JavaScript engine out of the browser and made it a program you can
+        run on your own machine, like Python or Java.
+      </p>
+
+      <div class="dg">
+        <div class="ba">
+          <div>
+            <span class="lbl">Before Node</span>
+            <ul class="stack-chips">
+              <li>Browser → runs JavaScript ✓</li>
+              <li>Your terminal → cannot ✗</li>
+            </ul>
+            <p class="verdict b">Build tools had to be written in other languages.</p>
+          </div>
+          <div>
+            <span class="lbl good-l">After Node</span>
+            <ul class="stack-chips">
+              <li>Browser → runs JavaScript ✓</li>
+              <li>Your terminal → runs it too ✓</li>
+            </ul>
+            <p class="verdict g">Now the tools can be JavaScript as well.</p>
+          </div>
+        </div>
+        <p class="dg-cap">Node is the engine your build tools run on. Visitors never install it.</p>
+      </div>
+
+      <pre><code>node -v
+<span class="comment">v20.20.2</span></code></pre>
+
+      <div class="note">
+        <span class="tag">In our project</span>
+        <p style="margin:0;">
+          Node 20 is installed. We hit a real consequence: the package manager
+          <code>pnpm</code> refused to run because it requires Node 22. We used
+          <code>npm</code> instead and lost nothing. Version numbers are not
+          decoration.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>Node lets JavaScript run on my computer, not just in a browser, so build tools can be written in it.</span>
+      </div>
+    </section>
+
+    <!-- =============== 04 =============== -->
+    <section id="s4">
+      <h2><span class="num">04</span> npm</h2>
+      <p class="lede">A way to download and manage code other people have written.</p>
+
+      <p>
+        <strong>npm</strong> stands for Node Package Manager, and it is two
+        things at once: a public library of over two million free code
+        <strong>packages</strong>, and the command-line tool that fetches them.
+        A package is simply a folder of reusable code that solves one problem, so
+        nobody has to solve it twice.
+      </p>
+
+      <h3>Why node_modules gets so big</h3>
+
+      <p>
+        You asked for four packages. You received 362. Here is why:
+      </p>
+
+      <div class="dg">
+        <pre class="tree"><code>portfolio/
+├── <span class="hl">next</span>            <span class="dim">you asked for this</span>
+│   ├── postcss        <span class="dim">next needs it</span>
+│   ├── styled-jsx     <span class="dim">next needs it</span>
+│   └── …              <span class="dim">and those need more again</span>
+├── <span class="hl">react</span>           <span class="dim">you asked for this</span>
+├── <span class="hl">tailwindcss</span>     <span class="dim">you asked for this</span>
+└── <span class="hl">typescript</span>      <span class="dim">you asked for this</span>
+
+<span class="cnt">= 362 packages actually installed</span></code></pre>
+        <p class="dg-cap">Packages depend on packages. This is the real count from our install.</p>
+      </div>
+
+      <p>
+        You never edit <code>node_modules</code>, never read it, and never commit
+        it. It is a <strong>build artifact</strong>: generated from instructions
+        rather than written by hand. Delete it and <code>npm install</code>
+        recreates it exactly.
+      </p>
+
+      <div class="warn">
+        <span class="tag">npm versus npx</span>
+        <p style="margin:0;">
+          <code>npx</code> runs a package <em>once</em> without installing it
+          permanently. That is why we wrote <code>npx create-next-app</code>: we
+          needed that tool for a single moment to generate the project, and never
+          again.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>npm downloads code other people wrote and remembers which versions my project uses.</span>
+      </div>
+    </section>
+
+    <!-- =============== 05 =============== -->
+    <section id="s5">
+      <h2><span class="num">05</span> package.json</h2>
+      <p class="lede">The one file that describes your whole project to the tooling. Here is the real one, annotated.</p>
+
+      <div class="dg">
+        <div class="anno">
+          <div class="anno-row">
+            <pre><code>"scripts": {
+  "dev":   "next dev",
+  "build": "next build"
+}</code></pre>
+            <p class="why"><b>Shortcuts you type</b>
+            <code>npm run dev</code> really runs <code>next dev</code>. You are not
+            memorising commands, you are reading them off this file.</p>
+          </div>
+
+          <div class="anno-row">
+            <pre><code>"dependencies": {
+  "next":  "16.2.12",
+  "react": "19.2.4"
+}</code></pre>
+            <p class="why"><b>Needed by the finished site</b>
+            These ship. They are part of what makes the live website work.</p>
+          </div>
+
+          <div class="anno-row">
+            <pre><code>"devDependencies": {
+  "tailwindcss": "^4",
+  "typescript":  "^5"
+}</code></pre>
+            <p class="why"><b>Needed only while building</b>
+            Exactly the left-hand column of the diagram in section 2. These never
+            reach the visitor.</p>
+          </div>
+        </div>
+        <p class="dg-cap">Three sections, three jobs. The split mirrors where code runs.</p>
+      </div>
+
+      <h3>What the caret means</h3>
+
+      <p>
+        <code>"^4"</code> means "version 4 point anything, but not version 5". The
+        caret allows safe updates while blocking versions likely to break things.
+        <code>"16.2.12"</code> with no caret means exactly that version and
+        nothing else.
+      </p>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>package.json lists what my project needs and defines the shortcut commands I type.</span>
+      </div>
+    </section>
+
+    <!-- =============== 06 =============== -->
+    <section id="s6">
+      <h2><span class="num">06</span> React</h2>
+      <p class="lede">A way to build a page out of reusable pieces instead of one long file.</p>
+
+      <div class="dg">
+        <div class="ba">
+          <div>
+            <span class="lbl bad-l">Plain HTML</span>
+            <div class="repeat">
+              <span>&lt;article&gt; card 1 …&lt;/article&gt;</span>
+              <span>&lt;article&gt; card 2 …&lt;/article&gt;</span>
+              <span>&lt;article&gt; card 3 …&lt;/article&gt;</span>
+              <span>&lt;article&gt; card 4 …&lt;/article&gt;</span>
+              <span>&lt;article&gt; card 5 …&lt;/article&gt;</span>
+              <span>&lt;article&gt; card 6 …&lt;/article&gt;</span>
+            </div>
+            <p class="verdict b">Add a button, edit six places, hope you missed none.</p>
+          </div>
+          <div>
+            <span class="lbl good-l">With React</span>
+            <pre><code>function Card({ project }) {
+  return &lt;article&gt;
+    {project.title}
+  &lt;/article&gt;;
+}
+
+projects.map(p =&gt;
+  &lt;Card project={p} /&gt;
+)</code></pre>
+            <p class="verdict g">Add a button once. All six update.</p>
+          </div>
+        </div>
+        <p class="dg-cap">Describe the piece once, then repeat it over your data.</p>
+      </div>
+
+      <p>
+        Those HTML-looking tags inside JavaScript are <strong>JSX</strong>. It is
+        not really HTML, it is JavaScript that gets converted into instructions
+        for building HTML. It just reads better than the alternative.
+      </p>
+
+      <div class="note">
+        <span class="tag">In our project</span>
+        <p style="margin:0;">
+          This is exactly why deleting four placeholder projects from
+          <code>site.ts</code> made four cards disappear with no other change.
+          Change the list, the page follows.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>React lets me describe a piece of the page once and reuse it, so changing it means editing one place.</span>
+      </div>
+    </section>
+
+    <!-- =============== 07 =============== -->
+    <section id="s7">
+      <h2><span class="num">07</span> Next.js</h2>
+      <p class="lede">React on its own is unopinionated. Next.js supplies the missing structure.</p>
+
+      <p>
+        React only handles building interfaces from components. It says nothing
+        about pages, URLs, images, fonts, or how to turn your work into files a
+        web server can serve. <strong>Next.js</strong> is a
+        <strong>framework</strong>: React plus answers to all of that.
+      </p>
+
+      <h3>Where a file lands is the configuration</h3>
+
+      <div class="dg">
+        <ul class="maps">
+          <li>
+            <code>src/app/page.tsx</code>
+            <svg width="26" height="14" viewBox="0 0 26 14" fill="none" class="arrow"><path d="M0 7h20M15 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <code class="out">the home page, /</code>
+          </li>
+          <li>
+            <code>src/app/icon.svg</code>
+            <svg width="26" height="14" viewBox="0 0 26 14" fill="none" class="arrow"><path d="M0 7h20M15 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <code class="out">the favicon tag</code>
+          </li>
+          <li>
+            <code>src/app/opengraph-image.png</code>
+            <svg width="26" height="14" viewBox="0 0 26 14" fill="none" class="arrow"><path d="M0 7h20M15 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <code class="out">the social share card</code>
+          </li>
+          <li>
+            <code>public/resume.pdf</code>
+            <svg width="26" height="14" viewBox="0 0 26 14" fill="none" class="arrow"><path d="M0 7h20M15 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <code class="out">/resume.pdf</code>
+          </li>
+        </ul>
+        <p class="dg-cap">No configuration written by hand. The filename is the instruction.</p>
+      </div>
+
+      <p>Beyond routing, here is what it did for us concretely:</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Feature</th><th>What it did</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Image optimisation</strong></td><td>Screenshots are 1200x750, but cards received a 576x360 version, generated to suit the screen.</td></tr>
+            <tr><td><strong>Font handling</strong></td><td>Three fonts downloaded at build time and served from our own domain, so text never jumps while loading.</td></tr>
+            <tr><td><strong>Prerendering</strong></td><td>Finished HTML generated once at build time, so visiting requires no server work.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warn">
+        <span class="tag">Version matters</span>
+        <p style="margin:0;">
+          Next.js 16 changed behaviour most tutorials still assume. One real
+          example: it no longer smooths scrolling during navigation unless you add
+          <code>data-scroll-behavior="smooth"</code>. We found this in the docs
+          bundled inside <code>node_modules</code>, not in older guides.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>React builds the pieces; Next.js decides how pages, images, fonts and files all fit together.</span>
+      </div>
+    </section>
+
+    <!-- =============== 08 =============== -->
+    <section id="s8">
+      <h2><span class="num">08</span> TypeScript</h2>
+      <p class="lede">JavaScript that checks your work before you run it.</p>
+
+      <p>
+        In plain JavaScript, a typo is only discovered when the code runs, and
+        sometimes not even then. <strong>TypeScript</strong> lets you describe the
+        <em>shape</em> of your data, then warns you the moment something does not
+        match.
+      </p>
+
+      <div class="dg">
+        <pre style="margin-bottom:1rem"><code>type Project = {
+  title: string;
+  kind: <span class="hl">"web" | "mobile" | "ai"</span>;   <span class="comment">// only these three</span>
+  liveUrl?: string;                <span class="comment">// ? means optional</span>
+};</code></pre>
+
+        <div class="checks">
+          <div class="check ok">
+            <span class="mark">✓ ACCEPTED</span>
+            <pre><code>{ title: "Yarn AI",
+  kind: "web" }</code></pre>
+          </div>
+          <div class="check no">
+            <span class="mark">✗ REJECTED</span>
+            <pre><code>{ title: "Yarn AI",
+  kind: "webb" }</code></pre>
+            <p class="msg">Type '"webb"' is not assignable to type '"web" | "mobile" | "ai"'.</p>
+          </div>
+        </div>
+        <p class="dg-cap">The error appears in your editor as you type, long before the browser.</p>
+      </div>
+
+      <p>
+        The <code>?</code> is quietly powerful. It says <code>liveUrl</code> may be
+        missing, which <em>forces</em> you to handle that case. That is exactly why
+        project cards without a live link fall back gracefully instead of
+        rendering a broken button.
+      </p>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>TypeScript is JavaScript where I describe what my data looks like, so mistakes get caught while typing.</span>
+      </div>
+    </section>
+
+    <!-- =============== 09 =============== -->
+    <section id="s9">
+      <h2><span class="num">09</span> Tailwind CSS</h2>
+      <p class="lede">Styling by composing small named classes, instead of maintaining separate stylesheets.</p>
+
+      <div class="dg">
+        <div class="ba">
+          <div>
+            <span class="lbl">Traditional CSS · two files</span>
+            <pre><code><span class="comment">/* styles.css */</span>
+.project-card {
+  display: flex;
+  padding: 24px;
+  border-radius: 16px;
+}</code></pre>
+            <pre style="margin-top:.5rem"><code><span class="comment">&lt;!-- index.html --&gt;</span>
+&lt;div class="project-card"&gt;</code></pre>
+            <p class="verdict b">Invent a name, then keep two files in sync forever.</p>
+          </div>
+          <div>
+            <span class="lbl good-l">Tailwind · one line</span>
+            <pre><code>&lt;div class="flex p-6 rounded-2xl"&gt;</code></pre>
+            <p class="verdict g">No naming, no second file, no hunting.</p>
+          </div>
+        </div>
+        <p class="dg-cap">Each class does one small thing. What you read is what you get.</p>
+      </div>
+
+      <h3>Design tokens keep it consistent</h3>
+
+      <p>
+        Tailwind's real strength is defining your palette once, then using it by
+        name everywhere:
+      </p>
+
+      <pre><code>@theme inline {
+  --color-ink:    #141221;
+  --color-violet: #9333ea;
+}</code></pre>
+
+      <p>
+        That block is what makes <code>text-ink</code> and <code>bg-violet</code>
+        valid classes. Change the hex once and the entire site follows. No hex
+        code is ever typed into a component.
+      </p>
+
+      <div class="note">
+        <span class="tag">In our project</span>
+        <p style="margin:0;">
+          This is what made the dark-mode accessibility fix a one-line change. We
+          added a token called <code>--on-accent</code> that flips colour with the
+          theme, and every button using it was corrected at once.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>Tailwind styles things with small classes on the element, using a palette I define once.</span>
+      </div>
+    </section>
+
+    <!-- =============== 10 =============== -->
+    <section id="s10">
+      <h2><span class="num">10</span> The dev server and the build</h2>
+      <p class="lede">Two ways of running the same project, for two different purposes.</p>
+
+      <div class="dg">
+        <ul class="pipe">
+          <li>
+            <span class="step">You write</span>
+            <span class="what">Source files</span>
+            <span class="detail">TypeScript, JSX and Tailwind classes</span>
+          </li>
+          <li>
+            <span class="step">npm run build</span>
+            <span class="what">The build</span>
+            <span class="detail">Types checked then removed, CSS collected, code compressed</span>
+          </li>
+          <li class="out">
+            <span class="step">Visitors get</span>
+            <span class="what">Plain files</span>
+            <span class="detail">HTML, CSS and JavaScript, nothing else</span>
+          </li>
+        </ul>
+        <p class="dg-cap">The build is the boundary from section 2, doing its work.</p>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>npm run dev</th><th>npm run build</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Purpose</strong></td><td>Fast feedback while working</td><td>The real website</td></tr>
+            <tr><td><strong>Where</strong></td><td>localhost:3000, your machine only</td><td>Files you upload</td></tr>
+            <tr><td><strong>Optimised</strong></td><td>No, that would slow it down</td><td>Yes, fully</td></tr>
+            <tr><td><strong>On save</strong></td><td>Browser updates instantly</td><td>You run it again</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warn">
+        <span class="tag">The most important lesson we learned</span>
+        <p style="margin:0 0 .7rem;"><strong>A successful build does not mean the page is correct.</strong></p>
+        <p style="margin:0;">
+          Every one of the five bugs we found passed the build cleanly. Dark mode
+          failed accessibility contrast, and the page scrolled sideways on mobile,
+          while the terminal reported success. The build checks that your code is
+          <em>valid</em>. Only opening the page checks that it is <em>right</em>.
+        </p>
+      </div>
+
+      <div class="say">
+        <b>In a line</b>
+        <span>Dev mode is for fast feedback; build makes the real site. Neither proves the page looks correct.</span>
+      </div>
+    </section>
+
+    <!-- =============== 11 =============== -->
+    <section id="s11">
+      <h2><span class="num">11</span> How it all fits together</h2>
+      <p class="lede">The same six tools, stacked in the order they depend on each other.</p>
+
+      <div class="dg">
+        <div class="layers">
+          <div class="layer top">
+            <span class="who">Your site</span>
+            <span class="job">The portfolio a visitor actually loads</span>
+          </div>
+          <div class="rung" aria-hidden="true">
+            <svg width="14" height="22" viewBox="0 0 14 22" fill="none"><path d="M7 21V3M2 8l5-5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="layer">
+            <span class="who">Tailwind</span>
+            <span class="job">Applies the design system consistently</span>
+          </div>
+          <div class="layer">
+            <span class="who">Next.js</span>
+            <span class="job">Pages, images, fonts, and the build itself</span>
+          </div>
+          <div class="layer">
+            <span class="who">React</span>
+            <span class="job">Builds the page from reusable components</span>
+          </div>
+          <div class="layer">
+            <span class="who">TypeScript</span>
+            <span class="job">Catches mistakes as you type</span>
+          </div>
+          <div class="layer">
+            <span class="who">npm</span>
+            <span class="job">Downloads all of the above and tracks versions</span>
+          </div>
+          <div class="layer base">
+            <span class="who">Node.js</span>
+            <span class="job">The foundation. Lets every tool above it run at all</span>
+          </div>
+        </div>
+        <p class="dg-cap">Read it bottom to top. Each layer needs the ones beneath it.</p>
+      </div>
+
+      <p>
+        The honest one-paragraph version: Node lets the tooling run. npm fetched
+        Next.js, React, TypeScript and Tailwind into <code>node_modules</code>.
+        You write components in React using JSX, with TypeScript checking your
+        data and Tailwind classes handling appearance. Next.js takes all of it,
+        runs the build, and produces plain HTML, CSS and JavaScript. That output
+        is the only thing a visitor ever downloads.
+      </p>
+
+      <div class="note">
+        <span class="tag">Worth remembering</span>
+        <p style="margin:0;">
+          None of these tools are required to make a website. You can build a
+          perfectly good one with three files and no tooling at all. They exist
+          because they make larger sites easier to change safely, which matters
+          the moment a project outgrows a single page.
+        </p>
+      </div>
+    </section>
+
+    <!-- =============== 12 =============== -->
+    <section id="s12">
+      <h2><span class="num">12</span> Command reference</h2>
+      <p class="lede">Everything you actually need to type, and what each one does.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Command</th><th>What happens</th></tr></thead>
+          <tbody>
+            <tr><td><code>npm install</code></td><td>Downloads everything listed in package.json</td></tr>
+            <tr><td><code>npm run dev</code></td><td>Starts the local site at localhost:3000</td></tr>
+            <tr><td><code>npm run build</code></td><td>Builds the real, optimised website</td></tr>
+            <tr><td><code>npx tsc --noEmit</code></td><td>Checks types without creating files</td></tr>
+            <tr><td><code>npx eslint .</code></td><td>Checks code quality and common mistakes</td></tr>
+            <tr><td><code>node -v</code></td><td>Prints your Node version</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The habit worth building: run all three checks, then <em>open the page and
+        look at it</em>. The terminal tells you the code is valid. Your eyes tell
+        you it is right.
+      </p>
+    </section>
+
+  </article>
+
+  <footer class="end">
+    Written alongside the build of Surya Srekanth's portfolio. For the
+    project-specific decisions, bugs, and fixes, see
+    <code>portfolio/docs/how-this-was-built.md</code> in the repository.
+  </footer>
+
+</div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var label = document.getElementById('themeLabel');
+
+    function current() {
+      var set = root.getAttribute('data-theme');
+      if (set) return set;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function paint() { label.textContent = current() === 'dark' ? 'Light' : 'Dark'; }
+
+    var saved = null;
+    try { saved = localStorage.getItem('foundations-theme'); } catch (e) {}
+    if (saved) root.setAttribute('data-theme', saved);
+    paint();
+
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('foundations-theme', next); } catch (e) {}
+      paint();
+    });
+  })();
+</script>
+</body>
+</html>

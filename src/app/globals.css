@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: the toggle stamps .dark on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #faf9ff;
+  --surface: #ffffff;
+  --sunk: #f3f1fb;
+  --ink: #141221;
+  --muted: #6e6a85;
+  --line: #e7e3f4;
+  --indigo: #4338ca;
+  --violet: #9333ea;
+  --signal: #ff6a4d;
+  /* Text laid over the accent gradient. Flips in dark mode, where the
+     gradient lightens and white would drop to ~2.6:1 contrast. */
+  --on-accent: #ffffff;
+  --shadow-card: 0 1px 2px rgb(20 18 33 / 0.04), 0 8px 24px -8px rgb(20 18 33 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(20 18 33 / 0.05), 0 24px 48px -16px rgb(67 56 202 / 0.22);
+}
+
+.dark {
+  --paper: #0c0a13;
+  --surface: #16131f;
+  --sunk: #110e1a;
+  --ink: #efedf7;
+  --muted: #9a95b0;
+  --line: #272031;
+  --indigo: #818cf8;
+  --violet: #c084fc;
+  --signal: #ff8a70;
+  --on-accent: #14121f;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 24px 48px -16px rgb(129 140 248 / 0.28);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-indigo: var(--indigo);
+  --color-violet: var(--violet);
+  --color-signal: var(--signal);
+  --color-on-accent: var(--on-accent);
+
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-instrument);
+  --font-mono: var(--font-jetbrains);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Keep anchor targets clear of the sticky nav. */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-instrument), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--violet) 22%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--violet);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  /*
+   * Section rhythm lives in exactly one rule so nothing downstream
+   * silently cancels it out.
+   */
+  .section {
+    padding-block: clamp(4.5rem, 10vw, 8rem);
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 5vw, 3rem);
+  }
+
+  .eyebrow {
+    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .gradient-text {
+    background-image: linear-gradient(100deg, var(--indigo), var(--violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* ---------- Signature: the evenness trace ---------- */
+
+/* The line lays itself down the way a chart recorder inks a strip. */
+@keyframes trace-draw {
+  from {
+    stroke-dashoffset: var(--trace-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes marker-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.trace-path {
+  stroke-dasharray: var(--trace-length);
+  stroke-dashoffset: var(--trace-length);
+  animation: trace-draw 2.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.trace-marker {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: marker-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ---------- Entrance ---------- */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  opacity: 0;
+  animation: rise-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .trace-path,
+  .trace-marker,
+  .rise {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+}
