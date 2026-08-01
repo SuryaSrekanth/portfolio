@@ -26,6 +26,10 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // Absolute base for og:image and friends. Without it Next falls back to the
+  // per-deployment URL, which changes on every deploy and breaks old share
+  // cards. Point this at a custom domain once there is one.
+  metadataBase: new URL("https://portfolio-surya-9b93.vercel.app"),
   title: `${profile.name} - ${profile.role}`,
   description: profile.headline,
   openGraph: {
