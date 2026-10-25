@@ -148,7 +148,12 @@ export const skillGroups: SkillGroup[] = [
   {
     label: "Domain",
     note: "Where the unfair advantage is",
-    items: ["Textile quality analysis", "Uster Classimat 5", "Defect diagnosis"],
+    items: [
+      "Textile quality analysis",
+      "Uster Classimat 5",
+      "Defect diagnosis",
+      "Data analysis",
+    ],
   },
 ];
 
