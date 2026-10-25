@@ -141,6 +141,11 @@ export const skillGroups: SkillGroup[] = [
     items: ["Gemini API", "Streamlit", "Prompt design"],
   },
   {
+    label: "Tools",
+    note: "Development, hosting and deployment",
+    items: ["Git", "GitHub", "Docker", "Supabase", "Vercel", "Render"],
+  },
+  {
     label: "Domain",
     note: "Where the unfair advantage is",
     items: ["Textile quality analysis", "Uster Classimat 5", "Defect diagnosis"],
