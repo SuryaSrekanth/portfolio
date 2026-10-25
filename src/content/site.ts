@@ -61,6 +61,21 @@ export const nav = [
 
 export const projects: Project[] = [
   {
+    slug: "lostnest",
+    title: "LostNest",
+    summary:
+      "A corporate Lost & Found management system for modern enterprise campuses.",
+    detail:
+      "Replaces chaotic workplace chat messages and lost bins with a structured directory. Features 3-tier corporate coordinate mapping (Building, Floor, Room), anti-theft proof-of-ownership claims, and automated 24-hour MongoDB TTL record cleanups upon return.",
+    stack: ["React 19", "Tailwind CSS", "Node.js", "Express", "MongoDB Atlas"],
+    kind: "web",
+    year: "2026",
+    liveUrl: "https://lostnest.vercel.app",
+    repoUrl: "https://github.com/SuryaSrekanth/lostnest",
+    image: "/projects/lostnest.png",
+    isLive: true,
+  },
+  {
     slug: "yarn-defect-ai",
     title: "AI Yarn Defect Assistant",
     summary:
@@ -88,13 +103,6 @@ export const projects: Project[] = [
     image: "/projects/resume-ai-bot.png",
     isLive: true,
   },
-  /*
-   * Surya's full-stack and mobile projects go here.
-   *
-   * Copy the shape of an entry above. `kind: "web"` renders a browser frame,
-   * `kind: "mobile"` renders a phone frame. Add `draft: true` while a card is
-   * still being written and it shows a dashed "Draft" chip.
-   */
 ];
 
 export type SkillGroup = {
@@ -118,7 +126,7 @@ export const skillGroups: SkillGroup[] = [
   {
     label: "Data",
     note: "Schema design and queries",
-    items: ["PostgreSQL", "MySQL"],
+    items: ["PostgreSQL", "MySQL", "MongoDB"],
   },
   {
     label: "Mobile",
